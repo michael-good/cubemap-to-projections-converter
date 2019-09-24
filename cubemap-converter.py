@@ -13,58 +13,76 @@ class CubeMapConverter:
         self.master = master
         self.cube_map_image = None
         self.output_image = None
+
         master.title("Cube map converter")
         master.geometry("320x700")
         master.resizable(FALSE, FALSE)
+
         self.mainframe = ttk.Frame(master, padding="3 3 12 12")
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-        ttk.Label(self.mainframe, text="1. Select the desired projection", font='bold', justify="left").grid(column=0, row=1,
+        ttk.Label(self.mainframe, text="1. Select the desired projection", font='bold', justify="left").grid(column=0,
+                                                                                                        row=1,
                                                                                                         columnspan=2,
                                                                                                         pady=10,
                                                                                                         padx=20,
-                                                                                                        sticky="we")
+                                                                                                        sticky=(W, E))
         self.current_projection = StringVar()
-        self.combobox_projection = ttk.Combobox(self.mainframe, textvariable=self.current_projection, state="readonly")
+        self.combobox_projection = ttk.Combobox(self.mainframe, state='readonly')
+        self.combobox_projection['textvariable'] = self.current_projection
         self.combobox_projection['values'] = ("Fisheye Equisolid", "Equirectangular")
         self.combobox_projection.grid(column=0, columnspan=2, row=2, pady=10, padx=20)
-
-        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=3, sticky="we", pady=10)
-
-        ttk.Label(self.mainframe, text="2. Load cube map image", font='bold', justify="left").grid(column=0, columnspan=2,
-                                                                                              row=4, pady=10, padx=20,
-                                                                                              sticky="we")
-        self.button_select_cube_map = ttk.Button(self.mainframe, text="Select cube map...", command=self.choose_cube_map)
-        self.button_select_cube_map.grid(column=0, columnspan=2, row=5, ipady=10, ipadx=15)
-        self.button_select_cube_map['state'] = 'disabled'
         self.combobox_projection.bind("<<ComboboxSelected>>", self.combobox_updated)
 
-        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=6, sticky="we", pady=10)
+        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=3, sticky=(W, E), pady=10)
+
+        ttk.Label(self.mainframe, text="2. Load cube map image", font='bold', justify="left").grid(column=0,
+                                                                                                   columnspan=2,
+                                                                                                   row=4,
+                                                                                                   pady=10,
+                                                                                                   padx=20,
+                                                                                                   sticky=(W, E))
+        self.button_select_cube_map = ttk.Button(self.mainframe, text="Select cube map...")
+        self.button_select_cube_map['command'] = self.choose_cube_map
+        self.button_select_cube_map['state'] = 'disabled'
+        self.button_select_cube_map.grid(column=0, columnspan=2, row=5, ipady=10, ipadx=15)
+
+        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=6, sticky=(W, E), pady=10)
 
         ttk.Label(self.mainframe, text="3. Provide required information", font='bold', justify="left").grid(column=0,
                                                                                                        columnspan=2,
-                                                                                                       row=7, pady=10,
+                                                                                                       row=7,
+                                                                                                       pady=10,
                                                                                                        padx=20,
-                                                                                                       sticky="we")
-        ttk.Label(self.mainframe, text="FOV (deg)", justify="left").grid(column=0, row=8, pady=10, padx=20, sticky="w")
+                                                                                                       sticky=(W, E))
+        ttk.Label(self.mainframe, text="FOV (deg)", justify="left").grid(column=0, row=8, pady=10, padx=20, sticky=W)
+
         self.field_of_view = StringVar()
         self.entry_fov = ttk.Entry(self.mainframe, textvariable=self.field_of_view, width=10)
-        self.entry_fov.grid(column=1, row=8, pady=10, sticky="w")
-        ttk.Label(self.mainframe, text="Size of output square image", wraplength=100, justify="left").grid(column=0, row=9,
-                                                                                                      pady=10, padx=20,
-                                                                                                      sticky="w")
+        self.entry_fov.grid(column=1, row=8, pady=10, sticky=W)
+
+        ttk.Label(self.mainframe, text="Size of output square image", wraplength=100, justify="left").grid(column=0,
+                                                                                                           row=9,
+                                                                                                           pady=10,
+                                                                                                           padx=20,
+                                                                                                           sticky=W)
         self.size_output_image = StringVar()
         self.entry_size_output_image = ttk.Entry(self.mainframe, textvariable=self.size_output_image, width=10)
-        self.entry_size_output_image.grid(column=1, row=9, pady=10, sticky="w")
+        self.entry_size_output_image.grid(column=1, row=9, pady=10, sticky=W)
 
-        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=10, sticky="we", pady=10)
+        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=10, sticky=(W, E), pady=10)
 
-        ttk.Label(self.mainframe, text="4. Generate the image!", font='bold', justify="left").grid(column=0, columnspan=2,
-                                                                                              row=11, pady=10, padx=20,
-                                                                                              sticky="we")
-        self.button_generate_output_image = ttk.Button(self.mainframe, text="Generate image!", command=self.create_output_image)
-        self.button_generate_output_image.grid(column=0, columnspan=2, row=12, ipady=10, ipadx=15)
+        ttk.Label(self.mainframe, text="4. Generate the image!", font='bold', justify="left").grid(column=0,
+                                                                                                   columnspan=2,
+                                                                                                   row=11,
+                                                                                                   pady=10,
+                                                                                                   padx=20,
+                                                                                                   sticky=(W, E))
+        self.button_generate_output_image = ttk.Button(self.mainframe, text="Generate image!")
+        self.button_generate_output_image['command'] = self.create_output_image
         self.button_generate_output_image['state'] = 'disabled'
+        self.button_generate_output_image.grid(column=0, columnspan=2, row=12, ipady=10, ipadx=15)
+
         self.style = ttk.Style(root)
         self.style.layout('text.Horizontal.TProgressbar',
                      [('Horizontal.Progressbar.trough',
@@ -74,19 +92,27 @@ class CubeMapConverter:
                       ('Horizontal.Progressbar.label', {'sticky': ''})])
         self.style.configure('text.Horizontal.TProgressbar', text='0 %')
         self.progress_var = DoubleVar()
-        self.progressbar = ttk.Progressbar(self.mainframe, style='text.Horizontal.TProgressbar', variable=self.progress_var, orient=HORIZONTAL, length=200, mode='determinate', maximum=100)
+        self.progressbar = ttk.Progressbar(self.mainframe, mode='determinate')
+        self.progressbar['style'] = 'text.Horizontal.TProgressbar'
+        self.progressbar['variable'] = self.progress_var
+        self.progressbar['length'] = 200
+        self.progressbar['maximum'] = 100
         self.progressbar.grid(column=0, columnspan=2, row=14, pady=15, ipadx=10)
 
-        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=15, sticky="we", pady=10)
+        ttk.Separator(self.mainframe, orient=HORIZONTAL).grid(column=0, columnspan=2, row=15, sticky=(W, E), pady=10)
 
-        self.button_save_image = ttk.Button(self.mainframe, text="Save image", command=self.save_image)
-        self.button_save_image.grid(column=0, columnspan=2, row=16, ipady=10, ipadx=15)
+        self.button_save_image = ttk.Button(self.mainframe, text="Save image")
+        self.button_save_image['command'] = self.save_image
         self.button_save_image['state'] = 'disabled'
-        self.button_exit = ttk.Button(self.mainframe, text="Exit", command=self.exit_app)
+        self.button_save_image.grid(column=0, columnspan=2, row=16, ipady=10, ipadx=15)
+
+        self.button_exit = ttk.Button(self.mainframe, text="Exit")
+        self.button_exit['command'] = self.exit_app
         self.button_exit.grid(column=0, columnspan=2, row=17, ipady=10, ipadx=15, pady=10)
+
         web_page = "Visit www.miguelangelbueno.me"
-        ttk.Label(self.mainframe, text=web_page, justify="center").grid(column=0, columnspan=2, row=18, pady=10, padx=20,
-                                                                   sticky="s")
+        ttk.Label(self.mainframe, text=web_page, justify="center").grid(column=0, columnspan=2, row=18,
+                                                                        pady=10, padx=20, sticky=S)
 
     def combobox_updated(self, *args):
         if not self.current_projection.get():
@@ -110,19 +136,22 @@ class CubeMapConverter:
 
     def create_output_image(self):
         self.button_save_image['state'] = 'disable'
+        self.combobox_projection['state'] = 'disable'
+        self.button_select_cube_map['state'] = 'disable'
         self.cube_map_image = np.array(self.cube_map_image)
         if self.current_projection.get() == "Fisheye Equisolid":
             try:
                 self.output_image = self.cubemap_to_fisheye(self.cube_map_image, float(self.field_of_view.get()), int(self.size_output_image.get()))
                 self.output_image = Image.fromarray(self.output_image.astype('uint8'))
                 self.output_image.show()
-                self.button_save_image['state'] = 'enable'
             except ValueError:
                 messagebox.showinfo(message='Please, provide required information', icon='error')
         elif self.current_projection.get() == "Equirectangular":
             self.output_image = self.cubemap_to_equirectangular(Image.fromarray(self.cube_map_image.astype('uint8')))
             self.output_image.show()
-            self.button_save_image['state'] = 'enable'
+        self.button_select_cube_map['state'] = 'enable'
+        self.button_save_image['state'] = 'enable'
+        self.combobox_projection['state'] = 'enable'
 
     def cubemap_to_fisheye(self, cube_map, fov, output_image_height):
 
