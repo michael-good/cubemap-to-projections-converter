@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image
-from cubemap2fisheye import *
-from cube2equi import *
+import numpy as np
+import math
+import cubemap2fisheye as fisheye
+import cube2equi as equi
 
 
 class CubeMapConverter:
@@ -91,6 +93,12 @@ class CubeMapConverter:
             self.button_select_cube_map['state'] = 'disabled'
         else:
             self.button_select_cube_map['state'] = 'enabled'
+            if self.current_projection.get() == "Equirectangular":
+                self.entry_fov['state'] = 'disabled'
+                self.entry_size_output_image['state'] = 'disabled'
+            else:
+                self.entry_fov['state'] = 'enable'
+                self.entry_size_output_image['state'] = 'enable'
 
     def choose_cube_map(self):
         types = [('PNG image', '*.png'), ('BMP image', '*.bmp'), ('JPEG image', '*.jpeg'), ('All files', '*')]
@@ -121,8 +129,8 @@ class CubeMapConverter:
         output_image = np.zeros((output_image_height, output_image_height, 3))
         field_of_view = fov * np.pi / 180
         face_size = int(cube_map.shape[1]/4)
-        r, phi = get_spherical_coordinates(output_image_height, output_image_height)
-        x, y, z = spherical_to_cartesian(r, phi, field_of_view)
+        r, phi = fisheye.get_spherical_coordinates(output_image_height, output_image_height)
+        x, y, z = fisheye.spherical_to_cartesian(r, phi, field_of_view)
 
         for row in range(0, output_image_height):
             for column in range(0, output_image_height):
@@ -131,9 +139,9 @@ class CubeMapConverter:
                     output_image[row, column, 1] = 0
                     output_image[row, column, 2] = 0
                 else:
-                    face = get_face(x[row, column], y[row, column], z[row, column])
-                    u, v = raw_face_coordinates(face, x[row, column], y[row, column], z[row, column])
-                    xn, yn = normalized_coordinates(face, u, v, face_size)
+                    face = fisheye.get_face(x[row, column], y[row, column], z[row, column])
+                    u, v = fisheye.raw_face_coordinates(face, x[row, column], y[row, column], z[row, column])
+                    xn, yn = fisheye.normalized_coordinates(face, u, v, face_size)
 
                     output_image[row, column, 0] = cube_map[yn, xn, 0]
                     output_image[row, column, 1] = cube_map[yn, xn, 1]
@@ -154,11 +162,11 @@ class CubeMapConverter:
 
         for ycoord in range(0, output_height):
             for xcoord in range(0, output_width):
-                corrx, corry, face = cubemap_to_equirectangular(xcoord,
-                                                                ycoord,
-                                                                output_width,
-                                                                output_height,
-                                                                n)
+                corrx, corry, face = equi.cubemap_to_equirectangular(xcoord,
+                                                                     ycoord,
+                                                                     output_width,
+                                                                     output_height,
+                                                                     n)
                 output_img.putpixel((xcoord, ycoord), cube_map.getpixel((corrx, corry)))
             self.progress_var.set((ycoord / output_height) * 100)
             self.style.configure('text.Horizontal.TProgressbar', text='{:.2f} %'.format(self.progress_var.get()))
