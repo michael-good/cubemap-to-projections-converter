@@ -129,7 +129,7 @@ class CubeMapConverter:
     def choose_cube_map(self):
         types = [('PNG image', '*.png'), ('BMP image', '*.bmp'), ('JPEG image', '*.jpeg'), ('All files', '*')]
         filename = filedialog.askopenfilename(filetypes=types)
-        if self.cube_map_image is not None or not filename == "":
+        if not filename == "":
             self.cube_map_image = Image.open(filename)
             self.button_generate_output_image['state'] = 'enabled'
         filename == ""
@@ -138,6 +138,7 @@ class CubeMapConverter:
         self.button_save_image['state'] = 'disable'
         self.combobox_projection['state'] = 'disable'
         self.button_select_cube_map['state'] = 'disable'
+        self.button_generate_output_image['state'] = 'disable'
         self.cube_map_image = np.array(self.cube_map_image)
         if self.current_projection.get() == "Fisheye Equisolid":
             try:
@@ -152,6 +153,7 @@ class CubeMapConverter:
         self.button_select_cube_map['state'] = 'enable'
         self.button_save_image['state'] = 'enable'
         self.combobox_projection['state'] = 'enable'
+        self.button_generate_output_image['state'] = 'enable'
 
     def cubemap_to_fisheye(self, cube_map, fov, output_image_height):
 
@@ -205,7 +207,8 @@ class CubeMapConverter:
 
     def save_image(self):
         filename = filedialog.asksaveasfilename()
-        self.output_image.save(str(filename))
+        if not filename == "":
+            self.output_image.save(str(filename))
 
     def exit_app(self):
         self.master.destroy()
