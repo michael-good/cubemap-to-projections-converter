@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image
 from cubemap2fisheye import *
+from cube2equi import *
 
 
 class CubeMapConverter:
@@ -11,7 +12,7 @@ class CubeMapConverter:
         self.cube_map_image = None
         self.output_image = None
         master.title("Cube map converter")
-        master.geometry("300x700")
+        master.geometry("320x700")
         master.resizable(FALSE, FALSE)
         self.mainframe = ttk.Frame(master, padding="3 3 12 12")
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -101,8 +102,8 @@ class CubeMapConverter:
 
     def create_output_image(self):
         self.button_save_image['state'] = 'disable'
+        self.cube_map_image = np.array(self.cube_map_image)
         if self.current_projection.get() == "Fisheye Equisolid":
-            self.cube_map_image = np.array(self.cube_map_image)
             try:
                 self.output_image = self.cubemap_to_fisheye(self.cube_map_image, float(self.field_of_view.get()), int(self.size_output_image.get()))
                 self.output_image = Image.fromarray(self.output_image.astype('uint8'))
@@ -111,14 +112,15 @@ class CubeMapConverter:
             except ValueError:
                 messagebox.showinfo(message='Please, provide required information', icon='error')
         elif self.current_projection.get() == "Equirectangular":
-            pass
+            self.output_image = self.cubemap_to_equirectangular(Image.fromarray(self.cube_map_image.astype('uint8')))
+            self.output_image.show()
+            self.button_save_image['state'] = 'enable'
 
     def cubemap_to_fisheye(self, cube_map, fov, output_image_height):
 
         output_image = np.zeros((output_image_height, output_image_height, 3))
         field_of_view = fov * np.pi / 180
         face_size = int(cube_map.shape[1]/4)
-        print(face_size)
         r, phi = get_spherical_coordinates(output_image_height, output_image_height)
         x, y, z = spherical_to_cartesian(r, phi, field_of_view)
 
@@ -141,6 +143,28 @@ class CubeMapConverter:
             self.progressbar.update()
         self.style.configure('text.Horizontal.TProgressbar', text='{:.2f} %'.format(100))
         return output_image
+
+    def cubemap_to_equirectangular(self, cube_map):
+
+        output_height = math.floor(cube_map.size[0] / 3)
+        output_width = 2 * output_height
+        n = math.floor(cube_map.size[1] / 3)
+
+        output_img = Image.new('RGB', (output_width, output_height))
+
+        for ycoord in range(0, output_height):
+            for xcoord in range(0, output_width):
+                corrx, corry, face = cubemap_to_equirectangular(xcoord,
+                                                                ycoord,
+                                                                output_width,
+                                                                output_height,
+                                                                n)
+                output_img.putpixel((xcoord, ycoord), cube_map.getpixel((corrx, corry)))
+            self.progress_var.set((ycoord / output_height) * 100)
+            self.style.configure('text.Horizontal.TProgressbar', text='{:.2f} %'.format(self.progress_var.get()))
+            self.progressbar.update()
+        self.style.configure('text.Horizontal.TProgressbar', text='{:.2f} %'.format(100))
+        return output_img
 
     def save_image(self):
         filename = filedialog.asksaveasfilename()
