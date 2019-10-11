@@ -14,7 +14,7 @@ More information within requirements.txt.
   
 ## How to run
 
-# Linux / MAC
+### Linux / MAC
 
 With Python 3 and all requirements installed, just run the following command in the folder of the project:
 
@@ -22,7 +22,7 @@ With Python 3 and all requirements installed, just run the following command in 
 python3 cubemap-converter.py
 ```
 
-# Windows
+### Windows
 
 Open a command line in the project root folder and type the following:
 
