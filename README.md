@@ -18,13 +18,17 @@ More information within requirements.txt.
 
 With Python 3 and all requirements installed, just run the following command in the folder of the project:
 
-`<addr>` python3 cubemap-converter.py
+```
+python3 cubemap-converter.py
+```
 
 # Windows
 
 Open a command line in the project root folder and type the following:
 
-`<addr>` python cubemap-converter.py
+```
+python cubemap-converter.py
+```
 
 
 ## Input files
